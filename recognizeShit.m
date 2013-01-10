@@ -1,7 +1,7 @@
 shit_initialized = exist('shit_initialized');
 if shit_initialized == 0
-    addpath I:
-    prstartup
+    %addpath I:
+    %prstartup
 
     a = prnist([0:9],[1:40:1000]);
     show(a);
