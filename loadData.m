@@ -4,9 +4,10 @@ a = prnist([0:9],[1:interval:1000]);
 raw = [];
 hog = [];
 
-labels = zeros(1, 250);
-
 period = floor(1000/interval);
+labels = zeros(1, period*10);
+
+
 
 for i = 0:9
     for j = 0:(period-1)
