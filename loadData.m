@@ -1,8 +1,5 @@
-function [ raw , hog ] = loadData(interval,dim)
+function [raw,hog,rawPCA,hogPCA] = loadData(interval,dim)
 a = prnist([0:9],[1:interval:1000]);
-
-raw = [];
-hog = [];
 
 period = floor(1000/interval);
 labels = zeros(1, period*10);
@@ -24,5 +21,11 @@ for i = 0:9
 end
 raw = dataset(raw, labels');
 hog = dataset(hog, labels');
+
+A = pca(raw,0.98)
+B = pca(hog,0.98)
+
+rawPCA = raw*A;
+hogPCA = hog*B;
 end
 
