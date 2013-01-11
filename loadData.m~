@@ -1,24 +1,31 @@
-function [ output_args ] = loadData(nrange,interval)
-a = prnist(nrange,[1:interval:1000]);
-hogdata = [];
-data = [];
+function [raw,hog,rawPCA,hogPCA] = loadData(interval,dim)
+a = prnist([0:9],[1:interval:1000]);
 
-labels = zeros(1, 250); %zeros(10, 25);
+period = floor(1000/interval);
+labels = zeros(1, period*10);
 
-period = 1000/interval;
-
-for i = nrange
-    for j = 0:(interval01)
-        index = 25 * i + j;
+for i = 0:9
+    for j = 0:(period-1)
+        index = period * i + j;
         nist = a(index + 1);
         im = data2im(nist);
-        imr = imresize(im, [32, 32]);
-        data(index + 1, :) = imr(:);
-        hog = HOG(imr);
-        hogdata(index+1,:) = hog(:);
+        
+        im = cleanUp(im);
+        
+        imr = imresize(im, dim);
+        raw(index + 1, :) = imr(:);
+        tmp = HOG(imr);
+        hog(index+1,:) = tmp(:);
         labels(index + 1) = i;
     end
 end
+raw = dataset(raw, labels');
+hog = dataset(hog, labels');
 
+A = pca(raw,0.95)
+B = pca(hog,0.95)
+
+rawPCA = raw*A;
+hogPCA = hog*B;
 end
 
