@@ -1,0 +1,320 @@
+% Save LaTeX kernel version of \@xfloat
+\makeatletter
+\let\my@xfloat\@xfloat
+\makeatother
+\documentclass[%
+        %draft,
+        %submission,
+        compressed,
+        final,
+        %
+        %technote,
+        %internal,
+        %submitted,
+        %inpress,
+        %reprint,
+        %
+        %titlepage,
+        notitlepage,
+        %anonymous,
+        narroweqnarray,
+        inline,
+        twoside,
+        ]{ieee}
+
+% Reset to LaTeX kernel version of \@xfloat
+\makeatletter
+\def\@xfloat#1[#2]{
+\my@xfloat#1[#2]% 
+\def\baselinestretch{1}%
+\@normalsize \normalsize
+}
+\makeatother
+%	
+% some standard modes are:
+%
+% \documentclass[draft,narroweqnarray,inline]{ieee}
+% \documentclass[submission,anonymous,narroweqnarray,inline]{ieee}
+% \documentclass[final,narroweqnarray,inline]{ieee}
+
+% Use the `endfloat' package to move figures and tables to the end
+% of the paper. Useful for `submission' mode.
+%\usepackage {endfloat}
+ 
+% Use the `times' package to use Helvetica and Times-Roman fonts
+% instead of the standard Computer Modern fonts. Useful for the 
+% IEEE Computer Society transactions.
+% (Note: If you have the commercial package `mathtime,' it is much
+% better, but the `times' package works too).
+%\usepackage {times}
+
+% In order to use the figure-defining commands in ieeefig.sty...
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+%\usepackage{ieeefig}
+
+\title{ Pattern recognition final assignment }
+\author{Laurent Verweijen \and Tamis van der Laan}
+\date{January 13, 2013}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    This paper describes our research for using pattern recognition techniques
+    to classify individual digits in bank account numbers and the monetary
+    amount. This paper will describe the steps who have taken to do such a task
+    which consist of preprocessing the data, training the classifier and testing
+    the performance. Matlab was used to perform these steps. Two cases are taken
+    into account. In the first case the pattern recognition system is trained
+    once and then applied. That means that our training set is large. In the
+    second case, the training set is trained for each batch to be processed,
+    which means that our training set is much smaller.
+\end{abstract}
+
+\section{Introduction}
+In our approach Matlab was used to research these problems. The PR toolbox was
+used developed by  Delft Pattern Recognition Group (in 2004 renamed to
+Quantitative Imaging) at the Faculty of Applied Physics (later Applied Sciences)
+of Delft University of Technology.  (http://prlab.tudelft.nl//content/pattern-recognition)
+This toolbox contains common classifiers used for pattern recognition which include support vector machine, k-nearest-neighbour classifier. We will first discuss how we solved the first case. Then the second case and finally we will give some conclusions and recommendations about how this could be applied in a banking system.
+\section{Methods}
+
+\subsection{Pre-processing}
+Either before training or classification a preprocessing step is used in order to filter out noise and transform the image in such a way that structure is maintained and the data prepared for feature selection, extraction and classification. Initially the data that was provided to consisted of a set of images from different sizes that each contains a handwritten digit.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.5\textwidth]{preprocessing2.png}
+    \caption{Preprocessing}
+    \label{fig:preprocessing}
+\end{figure}
+
+Figure \ref{fig:preprocessing} shows the pipeline that was used for preprocessing. First noise is reduced by removing very small objects. Then the data is closed in case the image contains gaps. Then the data is rotated so the longest side of the data (side with the most variance) is parallel to the x axis. Then the features of our data are extracted and finally principal component analysis is used to reduce the size of the feature set as some features are barely to not used.
+
+Below are a couple of examples that show noise reduction and slant correction based on scheme above:
+
+% fuck tamis hier
+
+\begin{tabular}{|c|c|}
+    \hline
+    Before & After \\
+    \hline
+    % hier plaatjes includen
+    \hline
+\end{tabular}
+
+\subsubsection{Dilation and Erosion}
+Noise is reduced by first eroding and then dilating the given binary input image using a … kernel. We then wish to close holes or attach objects near each other as parts of numbers may be missing. We do this using a closing operation which consist out of a dilation followed by an erosion again using a … kernel.
+
+\subsubsection{Central Moments for orientation and slant correction}
+Next we transform the binary input image such that it is centered and oriented in such a way that the longest side of the number is parallel to the y axis. The transformation used is skewing and removes the slanting from the text. This operation will also decrease the variance of the pixels as some pixels such as those in the corners will be activated less often and therefore contribute less to the number recognition system. This decrease in pixel variance propagates through to the Histogram Oriented Features. This in turn allows Principle Component Analysis to decrease the feature set significantly as we threshold out the low variance principal components. This allows for far faster training and classification performance.
+
+We first need to center the image, to do this we find the image centroid, which is simple the mean of the x axis and the y axis:
+
+\begin{align}
+    x&=(x_1+x_2+...+x_n)/n \\
+    y&=(y_1+y_2+...+y_n)/n
+\end{align}
+
+In order to find the orientation of binary numbers we used central moments. Central moments are calculated in the following way and make use of the centroid:
+
+\begin{equation}
+    \mu_{pq} = \sum_x \sum_y (x - \overline{x})^p(y - \overline{y})^q f(x, y)
+\end{equation}
+
+ 
+Next we you use this definition to compute $\mu_{20}, \mu_{21}, \mu_{11}$ which represents the x and y variance and covariance respectively. We then use these central moments to compute the orientation as followed:
+
+\begin{equation}
+    \Theta = \frac{1}{2} \arctan \left(
+        \frac{2\mu'_{11}}{\mu'_{20} - \mu'_{02}}
+    \right)
+\end{equation}
+
+We then skew the image parallel to the y axis and find the bounding box and square it where the sides are equal to the longest previous side such that geometric information is preserved. We leave a one pixel border around the bounding box because the Histogram of Oriented Gradient algorithm (as its name already suggests) makes use of the gradient (first order derivative in both the x and y direction) and thus its three part filter needs the extra one pixel space. The slant correction skew matrix is given by:
+
+\begin{equation}
+    S=[1 0; \sin(0.5 \pi - \theta),\cos(0.5 \pi - \theta)]
+\end{equation}
+
+\subsubsection{Scaling}
+Finally the images are scaled to 32 by 32 pixels, ready for feature selection, extraction and classification.
+\subsection{Feature extraction and selection}
+We used two methods for feature extraction and selection. The first method used is called Histogram Oriented Gradients and is a form of feature extraction and selection and is describes the orientation of the gradient in terms of frequency. The second method used is called principal component analysis and is used to remove those Histogram Oriented Gradient features with the least variance, and is thus a form of feature selection or dimensionality reduction. But before using these features we tested and experimented with combinations of features that are commonly used when dealing with handwriting detection. We list a couple of them below:
+
+    \begin{enumerate}
+        \item Using raw pixels as a control
+        \item Image profiles
+        \item Image moments such as hu moments
+        \item canny edge detector
+    \end{enumerate}
+
+
+    \subsubsection{Raw pixels}
+The simplest features that can be taken from an image are the raw pixels. This
+it also the fastest features extraction, because the only operation that needs
+to be performed is the scaling of all images to the same size. We tried this for
+different image sizes. Most digits got recognized well by using this method. The
+error rate on a big dataset was about 10\%. Especially the digits three and five in particular were often mixed up. Therefore we continued on with other feature extraction methods.
+
+\subsubsection{Histogram oriented features (HOG)}
+Histogram of Oriented Gradients is a feature extraction and selection technique. It makes use of the image gradient, were both the orientation of the gradient and magnitude are used. Due to the binary nature of our input we will not be using the magnitude of the gradient. The first step of the Histogram Oriented Gradients algorithm is to compute the gradient of the image. This is done by taking the first derivative of the image in both the x and y direction. The method used for this is convolution with the following filters:
+
+\begin{equation}
+    [-1, 0, 1] \text{ and } [-1, 0, 1]^T
+\end{equation}
+
+We now obtain two images containing the x derivative and y derivative respectively. The direction angle of the gradient for each pixel can now be computed using the following formula: .
+
+\begin{equation}
+    \theta = \arctan\left(\frac{\partial f}{\partial y}, 
+        \frac{\partial f}{\partial x}\right)
+\end{equation}
+
+The next step is to create cells which will contain histograms. In the original paper the gradient magnitude of each pixel within the range of a given bin is summed to get the final bin value. The original paper is aimed at pedestrian detection however using grey scale images. Because we are using binary images we simply increase the bin with one if the gradient direction of a pixels lays within the range of the given bin.
+
+This method will result in several bins per cell, the original author used nine bins per cell, we found through experiment that … bins were most effective for our problem. Also we found that using … cells worked best as opposed to nine used by the original author.
+
+Next the author locally normalizes the cells in order to compensate for illumination and contrast. However we do not implement this step as we are using binary images and thus both the contrast and illumination are already normalized perfectly across our image.
+
+The last step is to put all the bins of each cells into a column vector which has became our feature vector for classification.
+
+%HOW DID WE DERIVE AT THE GIVEN PARAMETERS?
+
+\subsection{Principal component analysis}
+The hog descriptor does a good job at both reducing the amount of features needed as well as extracting features that are easier to classify by classifiers. However there will still remain features (bins) that are either always empty or are barely used. For this reason we apply Principal Component analysis, which will extract the principal components and allows us to remove those with too little variance (empty to barely filled bins).
+
+Principal component analysis (pca) is a data reduction technique that generates a set of
+principal components such that as much variance as possible between the features is maintained.  In the features which we extracted from the data, some features don't differ as much as other features. This is due to the way the numbers are usually written and the orientation correction we used in a previous step. We therefore use pca to make our featureset smaller, so that our classifier becomes faster.
+
+The mathematical theory behind pca is as follows:
+Let X be a feature matrix with the rows representing different samples and the
+columns representing different features.  We first subtract the mean of each
+feature from the columns so that the mean of each column, becomes 0. We call
+this new matrix $X_{adjusted}$. Then we do an eigenvalue decomposition of the
+covariance of this matrix. $PDP^{-1}=cov(X_{adjusted})$. By sorting the
+eigenvectors by corresponding eigenvalues, we can find the L vectors that
+contribute most to our data.  The highest eigenvalues correspond to the
+eigenvectors that capture most covariance. The multiplication of our data with
+these eigenvectors $X_{reduced}=P_L X_{adjusted}$ will then become our reduced feature set.
+
+We tested pca on our featureset, keeping 99\% of all data and found a reduction of …% The performance of our algorithm, didn't become worse significantly and only decreased by ...%.
+
+%^ Pearson, K. (1901). "On Lines and Planes of Closest Fit to Systems of Points in Space" (PDF). Philosophical Magazine 2 (11): 559–572.
+\section{Classification Data Set}
+Although we initially opted to use the support vector machine we tested many classifiers in order to find the classifier that would give us the best classification result. It turned out that several classifiers were simply too computationally expensive to test. We used ten fold cross validation to test all the classifiers and 40 fold cross validation to compare the top classifiers found using the ten fold cross validation. The support vector machine classifier was one of these classifiers together with all neural network based classifiers that were too computationally expensive to subject to rigorous testing and were therefore not considered. We excluded these classifiers as we wish provide a certain degree of classification certainty to our client. We soon found a similar classifier called the Voted Perceptron classifier and found this to be the most likely candidate for use in classification as it is very similar to the Support Vector Machine. This notion was confirmed by the 10 fold cross validation testing phase as it yielded the lowest error of all classifiers considered.
+
+\section{Classifier Testing Phase}
+We first used 20 fold cross validation to find those classifiers best suitable to the problem at hand. With exclusion of the support vector machine classifier and any neural network based classifiers. The following two tables show the errors for the small and large data set respectively:
+\begin{table}
+    \begin{tabular} {p{5cm}lp{1.5cm}} %{lll}
+        \hline
+    Classifier & Error & Execution Time 1.0e-04 * \\
+        \hline
+    k-nearest neighbour Classifier & 0.1100 & 0.4500 \\
+    Linear kernel Classifier & 0.1400 & 0.2500 \\
+    Decision tree Classifier & 0.6400 & 0.2400 \\
+    Quadratic Bayes Normal Classifier & 0.9000 & 0.2600 \\
+    Fisher's Least Square Linear Classifier & 0.1800 & 0.3000 \\
+    Linear Bayes Normal Classifier & 0.1200 & 0.2700 \\
+    Linear classifier built on the KL expansion of the common covariance matrix & 0.1100 & 0.2600 \\
+    Logistic Linear Classifier & 0.2300 & 0.4400 \\
+    Naive Bayes classifier & 0.7400 & 0.2400 \\
+    Nearest Mean Classifier & 0.0800 & 0.2400 \\
+    Nearest Mean Scaled Classifier & 0.0900 & 0.3800 \\
+    Linear perceptron classifier & 0.4300 & 0.2500 \\
+    Polynomial Classification & 0.2300 & 0.4100 \\
+    Quadratic Bayes Normal Classifier & 0.9000 & 0.2800 \\
+    Voted perceptron classifier & 0.0900 & 0.2500 \\
+    Uncorrelated normal based quadratic Bayes classifier & 0.3200 & 0.2600 \\
+    Random subspace combining classifier & 0.8000 & 0.4100 \\
+        Linear classifier using PC expansion on the joint data & 0.1300 & 0.2900 \\
+    parzenc & 0.1100 & 0.3300 \\
+        \hline
+    \end{tabular}
+    \caption{This table shows the error and execution time of 20 fold cross
+    validation for the small data set which consists of 10 samples per class
+i.e. number.}
+\end{table}
+
+%\begin{table}
+    %Classifier    Error    Execution Time
+    %k-nearest neighbour Classifier        
+    %Linear kernel Classifier        
+    %Decision tree Classifier        
+    %Quadratic Bayes Normal Classifier        
+    %Fisher's Least Square Linear Classifier        
+    %Linear Bayes Normal Classifier        
+    %Linear classifier built on the KL expansion of the common covariance matrix        
+    %Logistic Linear Classifier        
+    %Naive Bayes classifier        
+    %Nearest Mean Classifier        
+    %Nearest Mean Scaled Classifier        
+    %Linear perceptron classifier        
+    %Polynomial Classification        
+    %Quadratic Bayes Normal Classifier        
+    %Voted perceptron classifier        
+    %Uncorrelated normal based quadratic Bayes classifier        
+    %Random subspace combining classifier		
+    %Linear classifier using PC expansion on the joint data		
+%\end{table}
+
+Table 2. This table shows the error and execution time of 20 fold cross validation for the large data set which consists of 100 samples per class i.e. number.
+
+
+Figure 3. A plot of the error on the x axis the execution time of the 20 fold cross validation on the y axis of the small data set consisting of 10 samples per class.
+
+% Alles hieronder is TODO
+
+\section{Voted Perceptron Classifier}
+As discussed above in the introduction the plan was to treat the number recognition system in the same way as the person recognition system implemented and described in the following paper  (LINK TO REPORT). This implementation used a state vector machine for classification. But because this classifier was too heavy for the problem at hand we opted for a simpler but similar classifier, namely the voted perceptron classifier. This study by Manabu Sassano, IJCNLP compared the SVM classifier to the voted perceptron classifier and found them almost equal in terms of accuracy. The advantage however of the Voted Perceptron Classifier is that is significantly faster in terms of learning and prediction time.
+
+The Voted Perceptron Classifier is very easy to understand, let  denote the feature vector were   denotes the amount of features and y{-1,1} the corresponding label. The training algorithm simply starts by applying the prediction step which is the simple function = function y=sing(vx) were v is initialized at the beginning as v=0. If the prediction y is correct i.e. y=y then no further steps are taken. If however the prediction is not correct then the training step occurs. This training step takes the form of the following simple equation . It has been shown that if the data is linearly separable that the algorithm will make a finite number of mistakes but will converge after a certain amount of cycles to the right answer. If however the data is not linearly separable the algorithm will not converge. Therefore the amount of cycles allowed is bounded. Due to the high performance of the algorithm we choose the maximum amount of cycles to be 10000 which may be far more than needed.
+
+Nearest mean classifier
+
+
+\section{Kernel Mapping The data for classification}
+The Voted Perceptron Classifier is in essence a linear classifier that can be made non linear by adding extra dimension based on the data itself. The way the data is mapped to extra dimensions is called kernel mapping, where the kernel dictates the structure of the added higher dimension. We experimented with sever proximity based kernels non linearise the classifier but they all yielded worse results. This suggests the data to be linear and no kernel mapping is required.
+
+\section{Large and small data set}
+We opted to use the Voted Perceptron Classifier for both the large and the small data sets as the obtained results were of superior quality to any other tested classifiers.
+%\section{Conclusion}
+%\section{Recommendations}
+
+\section{Future work}
+One thing that could be researched for performance accuracy would be combining
+classifiers. For example given the high performance of the Voted Perceptron
+Classifier bootstrapping in combination with majority vote could perhaps be used to
+increase the accuracy. In this way performance will be sacrificed in
+favor of accuracy.
+
+\section{Conclusions}
+We have shown that by using central moments and skewing we can provide decent
+text slanting correction. We also show that we can filter out noise using
+erosion and dilation filters. We have also obtained desirable low level error
+rates within the boundaries set by the client.
+
+\section{Recommendations}
+From our tests it seems like the more data is used for training the better the
+results. When 1000 instead of 10 samples per class are used, the error becomes
+10 times as small.
+
+
+
+We recommend using the nearest mean scaled classifier 
+
+ will having more training data help?
+ – would other features help?
+ – does the application require reject options?
+ – does a single classifier suffice for all digits on a bank cheque?
+ – what is the role of time constraints?
+ – etc.
+
+
+\end{document}
