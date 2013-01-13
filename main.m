@@ -19,39 +19,7 @@ disp('VPC CLASSIFIER ON PROCESSED DATASET:');
 crossval(processedLargeOriented,vpc,40);
 crossval(processedSmallOriented,vpc,40);
 
-test_classifiers(processedSmallOriented);
-test_classifiers(processedLargeOriented);
-% %Try data on Support Vector Machine
-% crossval(processed,svc([],'p'),10)
-% crossval(processed,(proxm(gendat(processed,300),'p')*vpc),10);
 
-%NOTE: try these svm's nusvc rbsvc 
-% WHAT IS FISHER MAPPING ETC???? fisherm  nlfisherm 
-% COMBINE CLASSIFIERS??? 
+test_data_sets(processedSmallOriented,processedLargeOriented)
 
-%K = proxm(processed,'distance')
-
-%mapped = processed*kernelm(processed,proxm([],'p'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'h'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'e'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'r'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'s'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'d'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'m'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'c'))
-%crossval(mapped,vpc([],1000),40);
-%mapped = processed*kernelm(processed,proxm([],'cosine'))
-%crossval(mapped,vpc([],1000),40);
-
-%mapped = processed*kernelm(processed,proxm([],'e'))
-%test_classifiers(mapped);
-
-%crossval(processed,svc([],'p'),10)
 
