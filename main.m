@@ -1,32 +1,25 @@
-%MAIN FILE
+global INIT;
+global a;
+[cleanLargeOriented,processedLargeOriented]=loadData(5,0)
+[cleanSmallOriented,processedSmallOriented]=loadData(100,0);
 
-shit_initialized = exist('shit_initialized');
-if shit_initialized == 0
-    a = prnist([0:9],[1:40:1000]);
-    show(a);
-    shit_initialized = true;
-end
 
-%array(row, column) so I don' t forget
+%Unprocessed data set test
+disp('PCLDC CLASSIFIER ON CLEAN DATASET:');
+crossval(cleanLargeOriented,pcldc,40);
+crossval(cleanSmallOriented,pcldc,40);
+disp('VPC CLASSIFIER ON CLEAN DATASET:');
+crossval(cleanLargeOriented,vpc,40);
+crossval(cleanSmallOriented,vpc,40);
 
-data = [];
-%labels = zeros(2, 25);
+disp('PCLDC CLASSIFIER ON PROCESSED DATASET:');
+crossval(processedLargeOriented,pcldc,40);
+crossval(processedSmallOriented,pcldc,40);
+disp('VPC CLASSIFIER ON PROCESSED DATASET:');
+crossval(processedLargeOriented,vpc,40);
+crossval(processedSmallOriented,vpc,40);
 
-% Create dataset from images
-for i = 0:9
-    for j = 0:24
-        index = 25 * i + j;
-        nist = a(index + 1);
-        im = data2im(nist);
-        imr = imresize(im, [16, 16])
-        data(index + 1, :) = imr;
-        labels(index + 1)= i;
-    end
-end
 
-toTrain = dataset(data, labels);
-crossval(toTrain, nmc);
+test_data_sets(processedSmallOriented,processedLargeOriented)
 
-%nmc(toTrain);
 
-% TODO hog
