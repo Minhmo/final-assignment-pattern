@@ -1,4 +1,4 @@
-for(i=1:1000)
+for(i=250:1000)
     i
     figure(1);
     show(data2im(a(i)));
