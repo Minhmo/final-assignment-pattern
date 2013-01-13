@@ -1,13 +1,7 @@
-%Image descriptor based on Histogram of Orientated Gradients for gray-level images. This code 
-%was developed for the work: O. Ludwig, D. Delgado, V. Goncalves, and U. Nunes, 'Trainable 
-%Classifier-Fusion Schemes: An Application To Pedestrian Detection,' In: 12th International IEEE 
-%Conference On Intelligent Transportation Systems, 2009, St. Louis, 2009. V. 1. P. 432-437. In 
-%case of publication with this code, please cite the paper above.
-
 function H=HOG2(Im)
-nwin_x=4;%set here the number of HOG windows per bound box
+nwin_x=4;
 nwin_y=4;
-B=12;%set here the number of histogram bins
+B=9;
 [L,C]=size(Im); % L num of lines ; C num of columns
 H=zeros(nwin_x*nwin_y*B,1); % column vector with zeros
 m=sqrt(L/2);

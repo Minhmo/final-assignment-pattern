@@ -15,13 +15,12 @@ function [cleanO,processedO] = loadData(interval,rmo)
             for j = 0:(period-1)
                 index = period * i + j;
                 nist = a(index + 1);
+                im = data2im(nist);
+                im = cleanUp(im);
                 
-                im1 = data2im(nist);
-                tmp = HOG2(im1);
-                clean(index + 1, :) = tmp(:);
+                clean(index + 1, :) = im(:);
                 
-                im2 = cleanUp(im1);
-                tmp = HOG(im2);
+                tmp = HOG(im);
                 processed(index+1,:) = tmp(:);
                 
                 labels(index + 1) = i;
