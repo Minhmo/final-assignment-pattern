@@ -1,31 +1,46 @@
-function [raw,hog,rawPCA,hogPCA] = loadData(interval,dim)
-a = prnist([0:9],[1:interval:1000]);
+function [cleanO,processedO] = loadData(interval,rmo)
 
-period = floor(1000/interval);
-labels = zeros(1, period*10);
-
-for i = 0:9
-    for j = 0:(period-1)
-        index = period * i + j;
-        nist = a(index + 1);
-        im = data2im(nist);
-        
-        im = cleanUp(im);
-        
-        imr = imresize(im, dim);
-        raw(index + 1, :) = imr(:);
-        tmp = HOG(imr);
-        hog(index+1,:) = tmp(:);
-        labels(index + 1) = i;
+    global INIT;
+    global a;
+   
+    if INIT ~= interval   
+        a = prnist([0:9],[1:interval:1000]);
+        INIT = interval;
     end
-end
-raw = dataset(raw, labels');
-hog = dataset(hog, labels');
 
-A = pca(raw,0.98)
-B = pca(hog,0.98)
+        period = floor(1000/interval);
+        labels = zeros(1, period*10);
+        
+        for i = 0:9
+            for j = 0:(period-1)
+                index = period * i + j;
+                nist = a(index + 1);
+                
+                im1 = data2im(nist);
+                tmp = HOG2(im1);
+                clean(index + 1, :) = tmp(:);
+                
+                im2 = cleanUp(im1);
+                tmp = HOG(im2);
+                processed(index+1,:) = tmp(:);
+                
+                labels(index + 1) = i;
+            end
+        end
+        
+        clean = dataset(clean,labels');
+        processed = dataset(processed,labels');
+     
+        A = pca(clean,0.99)
+        B = pca(processed,0.99)
 
-rawPCA = raw*A;
-hogPCA = hog*B;
+        cleanO = clean*A;
+        processedO = processed*B;
+        
+        %TODO: REMOVE OUTLIERS remoutl 
+        if(rmo==1)
+            cleanO = remoutl(cleanO)
+            processedO = remoutl(processedO)
+        end
 end
 
