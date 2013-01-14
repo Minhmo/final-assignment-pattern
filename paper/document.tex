@@ -55,7 +55,9 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{float}
-\usepackage{url}
+%\usepackage{url}
+\usepackage{biblatex}
+\bibliography{mybib.bib}
 
 \usepackage[utf8]{inputenc}
 
@@ -387,7 +389,7 @@ the algorithm will make a finite number of mistakes but will converge after a
 certain amount of cycles to the right answer. If however the data is not
 linearly separable the algorithm will not converge. Therefore the amount of
 cycles allowed is bounded. Due to the high performance of the algorithm we
-choose the maximum amount of cycles to be 10000 which may be far more than
+choose the maximum amount of cycles to be 1000 which may be far more than
 needed.
 
 % TODO mooiere formules
@@ -422,17 +424,6 @@ We opted to use the Voted Perceptron Classifier for both the large and the small
 
 % TODO
 \section{Future work}
-%One thing that could be researched for performance accuracy would be combining
-%classifiers. For example given the high performance of the Voted Perceptron
-%Classifier bootstrapping in combination with majority vote could be used to
-%perhaps increase the accuracy. In this way performance will be sacrificed in
-%favor of accuracy. In figure \ref{fig:test-large}
-%and \ref{fig:test-small} we can see that there are multiple
-%classifiers performing well for both large and small data sets and approach the
-%voted perceptron classifier in terms of performance. Combining these into one
-%classifier where the majority is taken using fast implementations may yield an
-%even lower error rate. %(Hier misschien officiele combinatie technieken noemen?)
-
 One thing that could be researched for performance accuracy would be combining
 classifiers.  For example we may be able to increase performance by
 bootstrapping from the training set and training multiple voted perceptron
@@ -444,8 +435,6 @@ bootstrapping and a majority vote but this time weigh the vote by the outcome of
 a function of the sample size. This function could be linear or nonlinear. A
 sigmoid function might be considered. Another possibility would be to combine
 the top 5 classifiers of both the small and large datasets respectively. 
-
-
 
 \section{Conclusion and recommendations}
 We have shown that by using central moments and skewing we can provide decent
@@ -461,7 +450,7 @@ still an error amount of 3.5 \%), we recommend that if very high amounts of
 money are transferred, these should still be checked by a human being.
 We don't think that adding more features to the image will drastically improve
 the result. The methods we used to generate features are already using the
-complete image and adding more features, would add the risk of over fitting the
+complete image and adding more features, would add the risk of overfitting the
 data.
 Another thing that might be looked into, are the classifiers based on a neural
 network. In our experiments, these classifiers performed too slow, but a more
@@ -477,7 +466,10 @@ classifier, which performed best in our experiments.
  %– what is the role of time constraints?
  %– etc.
 
-\bibliographystyle{plain}
-\bibliography{mybib}
+%\bibliographystyle{plain}
+%\bibliography{mybib}
+
+\printbibliography
+
 
 \end{document}
