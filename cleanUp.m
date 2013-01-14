@@ -17,4 +17,3 @@ im = im2bw(im,level);
 im = imresize(im,[32,32]);
 out = im;
 end
-

@@ -7,4 +7,3 @@ tform = maketform('affine',[1 0 0; sin(0.5*pi-alpha) cos(0.5*pi-alpha) 0; 0 0 1]
 im = imtransform(im,tform);
 out = im_box(im,1,1);
 end
-

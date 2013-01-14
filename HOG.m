@@ -1,7 +1,7 @@
-%Image descriptor based on Histogram of Orientated Gradients for gray-level images. This code 
-%was developed for the work: O. Ludwig, D. Delgado, V. Goncalves, and U. Nunes, 'Trainable 
-%Classifier-Fusion Schemes: An Application To Pedestrian Detection,' In: 12th International IEEE 
-%Conference On Intelligent Transportation Systems, 2009, St. Louis, 2009. V. 1. P. 432-437. In 
+%Image descriptor based on Histogram of Orientated Gradients for gray-level images. This code
+%was developed for the work: O. Ludwig, D. Delgado, V. Goncalves, and U. Nunes, 'Trainable
+%Classifier-Fusion Schemes: An Application To Pedestrian Detection,' In: 12th International IEEE
+%Conference On Intelligent Transportation Systems, 2009, St. Louis, 2009. V. 1. P. 432-437. In
 %case of publication with this code, please cite the paper above.
 
 function H=HOG(Im)
@@ -29,9 +29,9 @@ magnit=((grad_yu.^2)+(grad_xr.^2)).^.5;
 for n=0:nwin_y-1
     for m=0:nwin_x-1
         cont=cont+1;
-        angles2=angles(n*step_y+1:(n+2)*step_y,m*step_x+1:(m+2)*step_x); 
+        angles2=angles(n*step_y+1:(n+2)*step_y,m*step_x+1:(m+2)*step_x);
         magnit2=magnit(n*step_y+1:(n+2)*step_y,m*step_x+1:(m+2)*step_x);
-        v_angles=angles2(:);    
+        v_angles=angles2(:);
         v_magnit=magnit2(:);
         K=max(size(v_angles));
         %assembling the histogram with 9 bins (range of 20 degrees per bin)
@@ -47,7 +47,7 @@ for n=0:nwin_y-1
             end
         end
                 
-        H2=H2/(norm(H2)+0.01);        
+        H2=H2/(norm(H2)+0.01);
         H((cont-1)*B+1:cont*B,1)=H2;
     end
 end

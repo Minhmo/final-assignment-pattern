@@ -54,6 +54,8 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{float}
+\usepackage{url}
 
 \usepackage[utf8]{inputenc}
 
@@ -67,15 +69,7 @@
 \maketitle
 
 \begin{abstract}
-    This paper describes our research for using pattern recognition techniques
-    to classify individual digits in bank account numbers and the monetary
-    amount. This paper will describe the steps we have taken to do such a task
-    which consist of preprocessing the data, training the classifier and testing
-    the performance. Matlab was used to perform these steps. Two cases are taken
-    into account. In the first case the pattern recognition system is trained
-    once and then applied. That means that our training set is large. In the
-    second case, the training set is trained for each batch to be processed,
-    which means that our training set is much smaller.
+This paper describes our research for using pattern recognition techniques to classify individual digits in bank account numbers and the monetary amount. This paper will describe the steps we have taken to do such a task which consist of preprocessing the data, training the classifier and testing the performance. Matlab was used to perform these steps. Two cases are taken into account. In the first case the pattern recognition system is trained once and and then applied. That means that our training set is large. In the second case, the training set is trained for each batch to be processed, which means that our training set is much smaller. We describe how we found the optimal classifiers, how these classifiers work and how we optimized these classifiers to make them perform even better. After doing a lot of tests, we noticed that the best performance for the small dataset was reached by using a nearest mean scaled classifier and for the big dataset the voted perceptron classifier performed best. 
 \end{abstract}
 
 \section{Introduction}
@@ -110,7 +104,7 @@ maintained and the data is prepared for feature selection, extraction and
 classification. Initially the data that was provided consisted of a set of
 images from different sizes that each contains a handwritten digit.
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=\columnwidth]{preprocessing2.png}
     \caption{Preprocessing pipeline}
@@ -142,11 +136,11 @@ based on the scheme above:
 
 \subsubsection{Dilation and Erosion}
 
-% TODO Wat voor kernel? 2x
 Noise is reduced by first eroding and then dilating the given binary input image
-using a … kernel. We then wish to close holes or attach objects near each other
+using a 2-dimensional diamond shaped kernel. We then wish to close holes or
+attach objects near each other
 as parts of numbers may be missing. We do this using a closing operation which
-consists of a dilation followed by an erosion again using a … kernel.
+consists of a dilation followed by an erosion again using a 2-dimensional diamond shaped kernel.
 
 \subsubsection{Central Moments for orientation and slant correction}
 Next we transform the binary input image such that it is centered and oriented in such a way that the longest side of the number is parallel to the y axis. The transformation used is skewing and removes the slanting from the text. This operation will also decrease the variance of the pixels as some pixels such as those in the corners will be activated less often and therefore contribute less to the number recognition system. This decrease in pixel variance propagates through to the Histogram Oriented Features. This in turn allows Principle Component Analysis to decrease the feature set significantly as we threshold out the low variance principal components. This allows for far faster training and classification performance.
@@ -250,107 +244,122 @@ these eigenvectors $X_{reduced}=P_L X_{adjusted}$ will then become our reduced f
 \cite{Pearson}
 
 % TODO
-We tested pca on our featureset, keeping 99\% of all data and found a reduction
+We tested pca on our featur eset, keeping 99\% of all data and found a reduction
 of …. The performance of our algorithm, didn't become worse significantly and
 only decreased by ... \%.
 
 \section{Classification Data Set}
-Although we initially opted to use the support vector machine we tested many
+Although we initially opted to use the support vector machine, we tested many
 classifiers in order to find the classifier that would give us the best
-classification result. It turned out that several classifiers were
-computationally  simply too expensive to test. We used 10 fold cross validation
-to test all the classifiers and 40 fold cross validation to compare the top
-classifiers found using the 10 fold cross validation. The support vector
-machine classifier was one of these classifiers together with all neural network
-based classifiers that were computationally too expensive to subject to rigorous
-testing and were therefore not considered. We excluded these classifiers as we
-wish to provide a certain degree of classification certainty to our client. We
-soon found a similar classifier called the Voted Perceptron classifier and found
-this to be the most likely candidate for use in classification as it is very
-similar to the Support Vector Machine. This notion was confirmed by the ten 10 cross validation testing phase as it yielded the lowest error of all classifiers considered.
+classification result. It turned out that several classifiers were simply
+computationally too expensive to test. We used the nist\_eval function provided
+by the client to test all the classifiers. The support vector machine classifier
+was one of these classifiers together with all neural network based classifiers
+that were too computationally expensive to subject to rigorous testing and were
+therefore not considered. We excluded these classifiers as we wish to provide a
+certain degree of classification certainty to our client. We soon found a
+similar classifier called the Voted Perceptron classifier and found this to be
+the most likely candidate for use in classification as it is very similar to the
+Support Vector Machine. This notion was confirmed in the testing phase as it
+yielded the lowest error on the large data set of all classifiers considered.
+For the small data set however the voted perceptron classifier performed decent
+but not excellent. We found that the nearest mean scaled classifier performed
+best on the small data set. For this reason we chose the VPC for case one and
+the NMSC for case two. The performance of both classifiers were found to be more
+than fast enough.
 
 \subsection{Classifier Testing Phase}
-We first used 20 fold cross validation to find those classifiers best suitable to the problem at hand. With exclusion of the support vector machine classifier and any neural network based classifiers. The following two tables show the errors for the small and large data set respectively:
+We used the testing function provided by the client to test all the classifiers.
+We used the default setting of a 100 samples to test on. With exclusion of the
+support vector machine classifier and any neural network based classifiers. The
+following two tables show the errors for the small and large data set
+respectively:
 
 \begin{table}
     \begin{tabular} {p{5cm}lp{1.5cm}} %{lll}
         \hline
-    Classifier & Error & Execution Time 1.0e-04 * \\
+    Classifier & Error & Execution Time 1.0e-05 * \\
         \hline
-    K-nearest neighbour classifier & 0.1100 & 0.4500 \\
-    Linear kernel classifier & 0.1400 & 0.2500 \\
-    Decision tree classifier & 0.6400 & 0.2400 \\
-    Quadratic Bayes Normal classifier & 0.9000 & 0.2600 \\
-    Fisher's Least Square Linear classifier & 0.1800 & 0.3000 \\
-    Linear Bayes Normal classifier & 0.1200 & 0.2700 \\
-    Linear classifier built on the KL expansion of the common covariance matrix & 0.1100 & 0.2600 \\
-    Logistic Linear classifier & 0.2300 & 0.4400 \\
-    Naive Bayes classifier & 0.7400 & 0.2400 \\
-    Nearest Mean classifier & 0.0800 & 0.2400 \\
-    Nearest Mean Scaled classifier & 0.0900 & 0.3800 \\
-    Linear perceptron classifier & 0.4300 & 0.2500 \\
-    Polynomial Classification & 0.2300 & 0.4100 \\
-    Quadratic Bayes Normal classifier & 0.9000 & 0.2800 \\
-    Voted perceptron classifier & 0.0900 & 0.2500 \\
-    Uncorrelated normal based quadratic Bayes classifier & 0.3200 & 0.2600 \\
-    Random subspace combining classifier & 0.8000 & 0.4100 \\
-        Linear classifier using PC expansion on the joint data & 0.1300 & 0.2900 \\
-    Parzen classifier & 0.1100 & 0.3300 \\
+K-nearest neighbour Classifier & 0.1220 & 0.4634 \\
+Linear kernel Classifier & 01470 & 0.4966 \\
+Decision tree Classifier & 0.8050 & 0.4635 \\
+Fisher's Least Square Linear Classifier & 0.1580 & 0.4635 \\
+Linear Bayes Normal Classifier & 0.1470 & 0.4635 \\
+Linear classifier built on the KL expansion of the common covariance matrix & 0.1470 & 0.6290 \\
+Logistic Linear Classifier & 0.1550 & 0.4966 \\
+Naive Bayes classifier & 0.5290 & 0.5959 \\
+Nearest Mean Classifier & 0.1340 & 0.4304 \\
+Nearest Mean Scaled Classifier & 0.1000 & 0.5959 \\
+Linear perceptron classifier & 0.3910 & 0.4966 \\
+Polynomial Classification & 0.1580 & 0.4966 \\
+Quadratic Bayes Normal Classifier & 0.9000 & 0.4966 \\
+Voted perceptron classifier & 0.1900 & 0.4966 \\
+Uncorrelated normal based quadratic Bayes classifier & 0.2090 & 0.5297 \\
+Random subspace combining classifier & 0.9480 & 0.4966 \\
+Linear classifier using PC expansion on the joint data & 0.1470 & 0.5628 \\
+Parzen Classifier & 0.1130 & 0.4635 \\
         \hline
     \end{tabular}
-    \caption{This table shows the error and execution time of 20 fold cross
-    validation for the small data set which consists of 10 samples per class
-i.e. number.}
+    \caption{
+        This table shows the error and execution time of 20 fold cross
+        validation for the large data set which consists of 100
+        samples per class }
 \end{table}
 
 \begin{table}
     \begin{tabular} {p{5cm}lp{1.5cm}} %{lll}
         \hline
-    Classifier & Error & Execution Time 1.0e-04 * \\
+    Classifier & Error & Execution Time 1.0e-05 * \\
         \hline
-K-Nearest Neighbor classifier & 0.0390 & 0.2700 \\
-Linear kernel classifier & 0.0415 & 0.2500 \\
-Decision Tree classifier & 0.3775 & 0.2600 \\
-Fisher's Least Square Linear classifier & 0.0415 & 0.2700 \\
-Linear Bayes Normal classifier & 0.0355 & 0.3900 \\
-Linear classifier built on the KL expansion of the common covariance matrix & 0.0365 & 0.2300 \\
-Logistic Linear classifier & 0.0695 & 0.4100 \\
-Naive Bayes classifier & 0.0845 & 0.2400 \\
-Nearest Mean classifier & 0.0910 & 0.2400 \\
-Nearest Mean Scaled classifier & 0.0530 & 0.2700 \\
-Train a linear perceptron classifier & 0.0650 & 0.2600 \\
-Polynomial Classification & 0.0400 & 0.2500 \\
-Quadratic Bayes Normal classifier & 0.0400 & 0.2400 \\
-Voted perceptron classifier & 0.0375 & 0.2600 \\
-Uncorrelated normal based quadratic Bayes classifier & 0.0555 & 0.2400 \\
-Random subspace combining classifier & 0.0900 & 0.2900 \\
-Linear classifier using PC expansion on the joint data. & 0.0365 & 0.2800 \\
-Parzen classifier & 0.0390 & 0.2600 \\
+K-Nearest Neighbor Classifier & 0.0480 & 0.4635 \\
+Linear kernel classifier & 0.0360 & 0.4966 \\
+Decision Tree Classifier & 0.8030 & 0.4635 \\
+Fisher's Least Square Linear Classifier & 0.0380 & 0.4635 \\
+Linear Bayes Normal Classifier & 0.0330 & 0.4966 \\
+Linear classifier built on the KL expansion of the common covariance matrix & 0.0330 & 0.4966 \\
+Logistic Linear Classifier & 0.0510 & 0.4966 \\
+Naive Bayes classifier & 0.1130 & 0.4304 \\
+Nearest Mean Classifier & 0.0830 & 0.4966 \\
+Nearest Mean Scaled Classifier & 0.0430 & 0.4635 \\
+Linear perceptron classifier & 0.0680 & 0.4304 \\
+Polynomial Classification & 0.0380 & 0.4635 \\
+Quadratic Bayes Normal Classifier & 0.1220 & 0.4966 \\
+Voted perceptron classifier & 0.0290 & 0.4966 \\
+Uncorrelated normal based quadratic Bayes classifier & 0.0520 & 0.5297 \\
+Random subspace combining classifier & 0.0830 & 0.4966 \\
+Linear classifier using PC expansion on the joint data. & 0.0330 & 0.5297 \\
+Parzen Classifier & 0.0440 & 0.4635 \\
         \hline
     \end{tabular}
-    \caption{ This table shows the error and execution time of 20 fold cross
-    validation for the large data set which consists of 100 samples per class
-i.e. number.  }
+    \caption{ 
+        This table shows the error and execution time on the nist\_eval function
+        which uses 100 samples per class to test the classifier. The training
+        data consisted of 100 samples per class. }
         
 \end{table}
 
-\begin{figure}
-    \includegraphics[width=\columnwidth]{images/large_data_set_all_classifiers_tested3.png}
-    \caption{A plot of the error on the x axis the execution time of the 20 fold
-    cross validation on the y axis of the small data set consisting of 10
-    samples per class. The red line shows the 25\% maximum error set by the client.}
+\begin{figure}[H]
+    \includegraphics[width=\columnwidth]{images/large_data_set_tested.png}
+
+    \caption{ This table shows the error and execution time on the nist\_eval
+    function which uses 100 samples per class to test the classifier. The
+training data consisted of 10 samples per class. }
     \label{fig:test-large}
 \end{figure}
     
-\begin{figure}
-    \includegraphics[width=\columnwidth]{images/small_data_set_all_classifiers_tested3.png}
-    \caption{A plot of the error on the x axis the execution time of the 20 fold
-    cross validation on the y axis of the large data set consisting of 10
-samples per class. }
+\begin{figure}[H]
+    \includegraphics[width=\columnwidth]{images/small_data_set_tested.png}
+
+    \caption{
+        A plot of the error on the x axis the execution time of the nist\_eval
+        function on the y axis using a 100 samples per class training set. The
+        red line shows the 5\% maximum error set by the client.  }
     \label{fig:test-small}
 \end{figure}
 
-We see that many classifiers meet our criteria but one sticks out in particular, namely the voted perceptron classifier (shown in red in both figures). The data shows that the classifier is in the top classifiers in case of both the small and large data set, making it an excellent choice as classifier as the data may be delivered between the range of 10 and 100 samples per class.
+We see that many classifiers meet our criteria. We chose to use the two best
+classifiers namely the Voted perceptron classifier for the large data set and
+the Nearest Mean Scaled classifier for the small data set.
 
 \subsection{Voted Perceptron Classifier}
 As discussed above in the introduction the plan was to treat the number
@@ -381,6 +390,28 @@ cycles allowed is bounded. Due to the high performance of the algorithm we
 choose the maximum amount of cycles to be 10000 which may be far more than
 needed.
 
+% TODO mooiere formules
+\subsection{Nearest Mean Scaled Classifier}
+The nearest mean scaled classifier is an extension of the nearest mean
+classifier, so I will describe that one first.
+
+The nearest mean classifier is a classifier that assigns a sample to the class
+to which its euclidean distance is smallest. So from the training data the mean
+is taking for each class and assigned to $M\_C$ and then it minimizes:
+
+\begin{equation}
+    (X - M_c)^2 \text{ for $c \in C$}
+\end{equation}
+
+In which X is the feature vector from the sample that needs to be classified.
+And C are the classes. $M = {M_1, …, M_k}$ are the mean vectors of all the classes
+it could get assigned to.
+So $M_c = \sum{x \in X \text{ for all $X \in C$}}$
+
+The nearest mean scaling classifier is similar to a nearest mean classifier,
+except that nmsc makes the assumption that the data is according to a normal
+distribution, to which the data is scaled first.
+
 \subsection{Kernel Mapping The data for classification}
 The Voted Perceptron Classifier is in essence a linear classifier that can be made non linear by adding extra dimension based on the data itself. The way the data is mapped to extra dimensions is called kernel mapping, where the kernel dictates the structure of the added higher dimension. We experimented with sever proximity based kernels non linearise the classifier but they all yielded worse results. This suggests the data to be linear and no kernel mapping is required.
 
@@ -389,17 +420,32 @@ We opted to use the Voted Perceptron Classifier for both the large and the small
 %\section{Conclusion}
 %\section{Recommendations}
 
+% TODO
 \section{Future work}
+%One thing that could be researched for performance accuracy would be combining
+%classifiers. For example given the high performance of the Voted Perceptron
+%Classifier bootstrapping in combination with majority vote could be used to
+%perhaps increase the accuracy. In this way performance will be sacrificed in
+%favor of accuracy. In figure \ref{fig:test-large}
+%and \ref{fig:test-small} we can see that there are multiple
+%classifiers performing well for both large and small data sets and approach the
+%voted perceptron classifier in terms of performance. Combining these into one
+%classifier where the majority is taken using fast implementations may yield an
+%even lower error rate. %(Hier misschien officiele combinatie technieken noemen?)
+
 One thing that could be researched for performance accuracy would be combining
-classifiers. For example given the high performance of the Voted Perceptron
-Classifier bootstrapping in combination with majority vote could be used to
-perhaps increase the accuracy. In this way performance will be sacrificed in
-favor of accuracy. In figure \ref{fig:test-large}
-and \ref{fig:test-small} we can see that there are multiple
-classifiers performing well for both large and small data sets and approach the
-voted perceptron classifier in terms of performance. Combining these into one
-classifier where the majority is taken using fast implementations may yield an
-even lower error rate. %(Hier misschien officiele combinatie technieken noemen?)
+classifiers.  For example we may be able to increase performance by
+bootstrapping from the training set and training multiple voted perceptron
+classifiers. We could then use the majority vote of these classifiers for
+classification of given unknown samples. In this way accuracy may be increased.
+We could also construct a general classifier that can classify large and small
+data sets equally well by combining the VPC and the NMSC. We could again use
+bootstrapping and a majority vote but this time weigh the vote by the outcome of
+a function of the sample size. This function could be linear or nonlinear. A
+sigmoid function might be considered. Another possibility would be to combine
+the top 5 classifiers of both the small and large datasets respectively. 
+
+
 
 \section{Conclusion and recommendations}
 We have shown that by using central moments and skewing we can provide decent
