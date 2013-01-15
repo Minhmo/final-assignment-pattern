@@ -64,7 +64,7 @@
 %\usepackage{ieeefig}
 
 \title{A study on the classification of handwritten digits}
-\author{Laurent Verweijen \and Tamis van der Laan}
+\author{Laurent Verweijen, \and Tamis van der Laan}
 \date{January 14, 2013}
 
 \begin{document}
@@ -456,8 +456,16 @@ Another thing that might be looked into, are the classifiers based on a neural
 network. In our experiments, these classifiers performed too slow, but a more
 efficient implementation and with more time to train them, these classifiers
 might do pretty well.
-If no better classifier is found, we recommend using the nearest mean scaled
-classifier, which performed best in our experiments.
+
+If no classifiers can be combined, a single method has to be chosen and
+performance is an issue, then we recommend the Nearest Mean Scaled classifier if
+the training set is small and Voted Perceptron classifier if the training set is
+big.
+
+%If one of the , we recommend using the nearest mean scaled
+%classifier, which performed best in our experiments.
+%If no better classifier is found, we recommend using the nearest mean scaled
+%classifier, which performed best in our experiments.
 
  %will having more training data help?
  %– would other features help?
