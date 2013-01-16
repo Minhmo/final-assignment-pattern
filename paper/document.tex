@@ -8,7 +8,7 @@
         compressed,
         final,
         %
-        %technote,
+        %technote, 
         %internal,
         %submitted,
         %inpress,
@@ -87,12 +87,6 @@ for the big dataset the voted perceptron classifier performed best.
 \end{abstract}
 
 \section{Introduction}
-%In our approach Matlab was used to research these problems. The PR toolbox was
-%used which is developed by  Delft Pattern Recognition Group (in 2004 renamed to
-%Quantitative Imaging) at the Faculty of Applied Physics (later Applied Sciences)
-%of Delft University of Technology.  (http://prlab.tudelft.nl/content/pattern-recognition)
-%This toolbox contains common classifiers used for pattern recognition which include support vector machine, k-nearest-neighbour classifier. We will first discuss how we solved the first case. Then the second case and finally we will give some conclusions and recommendations about how this could be applied in a banking system.
-
 In our approach Matlab was used to research these problems. The PR toolbox was
 used for fast prototyping. The PR toolbox for Matlab was developed by the Delft
 Pattern Recognition Group (in 2004 renamed to Quantitative Imaging) at the
@@ -242,10 +236,9 @@ covariance of this matrix. $PDP^{-1}=cov(X_{adjusted})$. By sorting the
 eigenvectors by corresponding eigenvalues, we can find the $L$ vectors that
 contribute most to our data.  The highest eigenvalues correspond to the
 eigenvectors that capture most covariance. The multiplication of our data with
-these eigenvectors $X_{reduced}=P_L X_{adjusted}$ will then become our reduced feature set.
-\cite{Pearson}\\\\
-We tested pca on our feature set, keeping 99\% of all data and found a reduction
-of about 45\% dependant on the data set. 
+these eigenvectors $X_{reduced}=P_L X_{adjusted}$ will then become our reduced feature set.\cite{Pearson}\\\\
+Using principle component analysis we managed to reduce the 144 dimensions obtained from the histogram of oriented gradients feature extraction method to a mere 57 features which translates into a 60\% feature reduction! For the large data set we managed to reduce the 144 dimensional feature space to 82 which still signifies a major reduction of 43\% of the feature space! \\\\
+Not only did the principal component analysis method increase performance it also increased the classification accuracy! This is due to the reduction of useless dimensions and the elimination of problems related to the curse of dimensionality. This was especially so with the nearest scaled mean classifier as it is a density based classifier and thus is especially prone to the curse of dimensionality. On the small data set the classification error of the NSMC decreased with an impressive 80\%! The error on the large data set using the voted perceptron classifier also decreased with a percentage of 0.8\% which is also a very significant decrease given the large amount of data available.
 \section{Classification Data Set}
 Although we initially opted to use the support vector machine, we tested many
 classifiers in order to find the classifier that would give us the best
@@ -270,8 +263,7 @@ We used the testing function provided by the client to test all the classifiers.
 We used the default setting of a 100 samples to test on. With exclusion of the
 support vector machine classifier and any neural network based classifiers. The
 following two tables show the errors for the small and large data set
-respectively:
-
+respectively:\\
 \begin{table}
     \begin{tabular} {p{5cm}lp{1.5cm}} %{lll}
         \hline
@@ -300,8 +292,18 @@ Parzen Classifier & 0.1130 & 0.4635 \\
     \caption{
         This table shows the error and execution time on the nist\_eval function
         which uses 100 samples per class to test the classifier. The training
-        data consisted of 10 samples per class. }
+        data consisted of the small data set of 10 samples per class. }
 \end{table}
+
+\begin{figure}[] 
+    \includegraphics[scale=0.385]{images/large_data_set_tested.png}
+
+    \caption{ This table shows the error and execution time on the nist\_eval
+    function which uses 100 samples per class to test the classifier. The
+training data consisted of the small data set of 10 samples per class.The
+        red line shows the 25\% maximum error set by the client. }
+    \label{fig:test-large}
+\end{figure}
 
 \begin{table}
     \begin{tabular} {p{5cm}lp{1.5cm}} %{lll}
@@ -331,18 +333,9 @@ Parzen Classifier & 0.0440 & 0.4635 \\
     \caption{ 
         This table shows the error and execution time on the nist\_eval function
         which uses 100 samples per class to test the classifier. The training
-        data consisted of 100 samples per class. }
+        data consisted of the large data set of 100 samples per class. }
         
 \end{table}
-\begin{figure}[] 
-    \includegraphics[scale=0.385]{images/large_data_set_tested.png}
-
-    \caption{ This table shows the error and execution time on the nist\_eval
-    function which uses 100 samples per class to test the classifier. The
-training data consisted of 10 samples per class.The
-        red line shows the 25\% maximum error set by the client. }
-    \label{fig:test-large}
-\end{figure}
     
 \begin{figure}[]
     \includegraphics[scale=0.385]{images/small_data_set_tested.png}
@@ -350,7 +343,7 @@ training data consisted of 10 samples per class.The
     \caption{
         This table shows the error and execution time on the nist\_eval
     function which uses 100 samples per class to test the classifier. The
-training data consisted of 100 samples per class.The
+training data consisted of the large data set of 100 samples per class.The
         red line shows the 5\% maximum error set by the client.  }
     \label{fig:test-small}
 \end{figure}
@@ -430,15 +423,16 @@ From our tests it seems like the more data is used for training the better the
 results. When 1000 instead of 10 samples per class are used, the error becomes
 10 times as small. However this does not mean that we will ever achieve a zero percent error rate. This is because there is a degree of subjectivity in the data, what one person may label a eight may be labeled by others as a six. We thus we see practically identical symbols in more than one class. We can only approximate with a large enough data set what class label the average person would give to a number symbol. \\\\
 In this sense the system will never reach a zero percent error. Adding extra features also won't solve this problem as ambiguity can still occur. With this insight we recommend using ambiguity rejection were credit cards with ambiguous unclear numbers can be traced back to their owners by employees. \\\\
+Apart from the problem of ambiguity between classes there is another possible problem which is that symbols could be written down that aren't numbers at all. Symbols that do not belong to any class will show up as outliers, therefore we recommend a form of outlier detection to be applied. This outlier detection mechanism would have to be be applied to the data before principal component analysis as features normally not activated and removed by principal component analysis may now be activated and reveal outliers. After divergent symbols are detected by outlier detection the corresponding credit card can again as above be traced back to their respected owners.\\\\
 We believe that a single classifier will suffice for classification as a large training set is already available and classification error and time is low. We understand that the choice of classifier is important when dealing with this problem we however belief that the feature extraction method used is more important in order to minimize the classification error. This can be seen in figures two and three which show good performance for many classifiers. \\\\
 Another thing that might be looked into, are the classifiers based on a neural
 network. In our experiments, these classifiers performed too slow, but a more
 efficient implementation and with more time to train them, these classifiers
-might do pretty well and would automatically return a degree of certainty per number.\\\\
+might do pretty well and would automatically return a degree of certainty per number thus having a automatic form of outlier and ambiguity rejection in them.\\\\
 If no classifiers can be combined, a single method has to be chosen and
 performance is an issue, then we recommend the Nearest Mean Scaled classifier if
 the training set is small and Voted Perceptron classifier if the training set is
-big.
+large.
 
 %\bibliographystyle{plain}
 %\bibliography{mybib}
