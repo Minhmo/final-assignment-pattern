@@ -73,7 +73,7 @@
 \begin{abstract}
 This paper describes our research for using pattern recognition techniques to
 classify individual digits in bank account numbers and the monetary amount. This
-paper will describe the steps we have taken to do such a task which consist of
+paper will describe the steps we have taken to do such a task which consists of
 preprocessing the data, training the classifier and testing the performance.
 Matlab was used to perform these steps. Two cases are taken into account. In the
 first case the pattern recognition system is trained once and then applied.
@@ -87,13 +87,15 @@ for the big dataset the voted perceptron classifier performed best.
 \end{abstract}
 
 \section{Introduction}
-In our approach Matlab was used to research these problems. The PR toolbox was
-used for fast prototyping. The PR toolbox for Matlab was developed by the Delft
-Pattern Recognition Group (in 2004 renamed to Quantitative Imaging) at the
-Faculty of Applied Physics (later Applied Sciences) of Delft University of
-Technology \cite{Ferdi}.
+In our approach Matlab was used to research these problems using the PR toolbox
+for fast prototyping. 
 This toolbox contains common classifiers used for pattern recognition which
-include among others the support vector machine and the k-nearest-neighbour classifier. We will first
+include among others the support vector machine and the k-nearest-neighbour
+classifier. 
+The PR toolbox for Matlab was developed by the Delft Pattern Recognition Group
+(in 2004 renamed to Quantitative Imaging) at the Faculty of Applied Physics
+(later Applied Sciences) of Delft University of Technology \cite{Ferdi}.
+We will first
 discuss how we solved the first case, then the second case and finally we will
 give some conclusions and recommendations about how this could be applied in a
 banking system. Prior experience with person recognition \cite{Tamis} led us to
@@ -101,7 +103,8 @@ the use of Histogram of Oriented Gradients feature
 extraction in combination with a support vector machine classifier. Eventually
 the support vector machine would be dropped in favor of a similar less
 computationally expensive classifier named the voted perceptron classifier. Many
-other classifiers were also tested. For the second case where the data set was small we found that the nearest nearest mean scaled classifier performs best.
+other classifiers were also tested. For the second case where the data set was
+small we found that the nearest nearest mean scaled classifier performed best.
 
 \section{Methods}
 \subsection{Pre-processing}
@@ -119,7 +122,7 @@ images from different sizes that each contains a handwritten digit.
 \end{figure}
 
 Figure \ref{fig:preprocessing} shows the pipeline that was used for preprocessing. First noise is reduced by removing very small objects. Then the data is closed in case the image contains gaps. Then the data is skewed so the longest side of the data (side with the most variance) is parallel to the y axis (slant correction). Then the features of our data are extracted and finally principal component analysis is used to reduce the size of the feature set as some features are barely to not used.\\\\
-In Table I some examples that show noise reduction and slant correction
+In table \ref{tab:noise_reduction} some examples that show noise reduction and slant correction
 are shown based on the scheme above.
 \begin{table}
     \begin{tabular}{|c|c|}
@@ -136,6 +139,7 @@ are shown based on the scheme above.
         % hier plaatjes includen
         \hline
     \end{tabular}
+    \label{tab:noise_reduction}
     \caption{Noise reduction and slant correction applied to our images}
 \end{table}
 
@@ -197,7 +201,7 @@ reduction that describes the orientation of the gradient in terms of frequency. 
 We however found that none could compete with the histogram of oriented gradients in combination with the classifiers tested.
     \subsubsection{Raw pixels}
 The simplest features that can be taken from an image are the raw pixels. This
-it also the fastest feature extraction, because the only operation that needs
+is also the fastest feature extraction, because the only operation that needs
 to be performed is the scaling of all images to the same size. We tried this for
 different image sizes. Most digits got recognized well by using this method. The
 error rate on a big dataset was about 10\%. In particular the digits three and five were often mixed up. We used the raw data as a control to compare features based on classification errors. 
@@ -210,19 +214,28 @@ Histogram of Oriented Gradients is a feature extraction and selection technique.
     [-1, 0, 1] \text{ and } [-1, 0, 1]^T
 \end{equation}
 
-We now obtain two images containing the x derivative and y derivative respectively. The direction angle of the gradient for each pixel can now be computed using the following formula: .
+We now obtain two images containing the x derivative and y derivative respectively. The direction angle of the gradient for each pixel can now be computed using the following formula: 
 
 \begin{equation}
     \theta = \arctan\left(\frac{\partial f}{\partial y}, 
         \frac{\partial f}{\partial x}\right)
 \end{equation}
 
-The next step is to create cells which will contain histograms. In the original paper the gradient magnitude of each pixel within the range of a given bin is summed to get the final bin value. The original paper is aimed at pedestrian detection however using grey scale images. Because we are using binary images we simply increase the bin with one if the gradient direction of a pixels lays within the range of the given bin.\\\\
-This method will result in several bins per cell, the original author used nine
-bins per cell, we found through experiment that 9 bins were most effective for
-our problem. Also we found that using 16 cells worked best as opposed to nine used by the original author.\\\\
-Next the author locally normalizes the cells in order to compensate for illumination and contrast. However we do not implement this step as we are using binary images and thus both the contrast and illumination are already normalized perfectly across our image.\\\\
+The next step is to create cells which will contain histograms. In the original
+paper the gradient magnitude of each pixel within the range of a given bin is
+summed to get the final bin value. The original paper is aimed at pedestrian
+detection however using grey scale images. Because we are using binary images we
+simply increase the bin width with one if the gradient direction of a pixels lays within the range of the given bin.\\\\
+This method will result in several bins per cell, the original author used 9
+bins per cell and 16 cells. We found through experiment that 9 bins were most effective for
+our problem as well, but 16 cells were used as opposed to 9 used by the original author.
+We derived at these constants experimentally by looking at the average and
+minimum error of all the tested classifiers for each possible combination were
+25 cells and 10 bins were chosen as maximums. \\\\
+
+Next, the author locally normalizes the cells in order to compensate for illumination and contrast. However we do not implement this step as we are using binary images and thus both the contrast and illumination are already normalized perfectly across our image.\\\\
 The last step is to put all the bins of each cells into a column vector which has became our feature vector for classification.
+
 \subsection{Principal component analysis}
 The hog descriptor does a good job at both reducing the amount of features needed as well as extracting features that are easier to classify by the bulk of classifiers. However there will still remain features (bins) that are either always empty or are barely used. For this reason we apply Principal Component analysis, which will extract the principal components and allows us to remove those with too little variance (empty to barely filled bins).\\\\
 Principal component analysis (pca) is a data reduction technique that generates a set of
@@ -238,7 +251,7 @@ contribute most to our data.  The highest eigenvalues correspond to the
 eigenvectors that capture most covariance. The multiplication of our data with
 these eigenvectors $X_{reduced}=P_L X_{adjusted}$ will then become our reduced feature set.\cite{Pearson}\\\\
 Using principle component analysis we managed to reduce the 144 dimensions obtained from the histogram of oriented gradients feature extraction method to a mere 57 features which translates into a 60\% feature reduction! For the large data set we managed to reduce the 144 dimensional feature space to 82 which still signifies a major reduction of 43\% of the feature space! \\\\
-Not only did the principal component analysis method increase performance it also increased the classification accuracy! This is due to the reduction of useless dimensions and the elimination of problems related to the curse of dimensionality. This was especially so with the nearest scaled mean classifier as it is a density based classifier and thus is especially prone to the curse of dimensionality. On the small data set the classification error of the NSMC decreased with an impressive 80\%! The error on the large data set using the voted perceptron classifier also decreased with a percentage of 0.8\% which is also a very significant decrease given the large amount of data available.
+Not only did the principal component analysis method increase performance, it also increased the classification accuracy! This is due to the reduction of useless dimensions and the elimination of problems related to the curse of dimensionality. This was especially so with the nearest scaled mean classifier as it is a density based classifier and thus is especially prone to the curse of dimensionality. On the small data set the classification error of the NSMC decreased with an impressive 80\%! The error on the large data set using the voted perceptron classifier also decreased with a percentage of 0.8\% which is also a very significant decrease given the large amount of data available.
 \section{Classification Data Set}
 Although we initially opted to use the support vector machine, we tested many
 classifiers in order to find the classifier that would give us the best
@@ -269,24 +282,24 @@ respectively:\\
         \hline
     Classifier & Error & Execution Time 1.0e-05 * \\
         \hline
-K-nearest neighbour Classifier & 0.1220 & 0.4634 \\
-Linear kernel Classifier & 01470 & 0.4966 \\
-Decision tree Classifier & 0.8050 & 0.4635 \\
-Fisher's Least Square Linear Classifier & 0.1580 & 0.4635 \\
-Linear Bayes Normal Classifier & 0.1470 & 0.4635 \\
+K-nearest neighbour Classifier                                              & 0.1220 & 0.4634 \\
+Linear kernel Classifier                                                    & 01470  & 0.4966 \\
+Decision tree Classifier                                                    & 0.8050 & 0.4635 \\
+Fisher's Least Square Linear Classifier                                     & 0.1580 & 0.4635 \\
+Linear Bayes Normal Classifier                                              & 0.1470 & 0.4635 \\
 Linear classifier built on the KL expansion of the common covariance matrix & 0.1470 & 0.6290 \\
-Logistic Linear Classifier & 0.1550 & 0.4966 \\
-Naive Bayes classifier & 0.5290 & 0.5959 \\
-Nearest Mean Classifier & 0.1340 & 0.4304 \\
-Nearest Mean Scaled Classifier & 0.1000 & 0.5959 \\
-Linear perceptron classifier & 0.3910 & 0.4966 \\
-Polynomial Classification & 0.1580 & 0.4966 \\
-Quadratic Bayes Normal Classifier & 0.9000 & 0.4966 \\
-Voted perceptron classifier & 0.1900 & 0.4966 \\
-Uncorrelated normal based quadratic Bayes classifier & 0.2090 & 0.5297 \\
-Random subspace combining classifier & 0.9480 & 0.4966 \\
-Linear classifier using PC expansion on the joint data & 0.1470 & 0.5628 \\
-Parzen Classifier & 0.1130 & 0.4635 \\
+Logistic Linear Classifier                                                  & 0.1550 & 0.4966 \\
+Naive Bayes classifier                                                      & 0.5290 & 0.5959 \\
+Nearest Mean Classifier                                                     & 0.1340 & 0.4304 \\
+Nearest Mean Scaled Classifier                                              & 0.1000 & 0.5959 \\
+Linear perceptron classifier                                                & 0.3910 & 0.4966 \\
+Polynomial Classification                                                   & 0.1580 & 0.4966 \\
+Quadratic Bayes Normal Classifier                                           & 0.9000 & 0.4966 \\
+Voted perceptron classifier                                                 & 0.1900 & 0.4966 \\
+Uncorrelated normal based quadratic Bayes classifier                        & 0.2090 & 0.5297 \\
+Random subspace combining classifier                                        & 0.9480 & 0.4966 \\
+Linear classifier using PC expansion on the joint data                      & 0.1470 & 0.5628 \\
+Parzen Classifier                                                           & 0.1130 & 0.4635 \\
         \hline
     \end{tabular}
     \caption{
@@ -310,24 +323,24 @@ training data consisted of the small data set of 10 samples per class.The
         \hline
     Classifier & Error & Execution Time 1.0e-05 * \\
         \hline
-K-Nearest Neighbor Classifier & 0.0480 & 0.4635 \\
-Linear kernel classifier & 0.0360 & 0.4966 \\
-Decision Tree Classifier & 0.8030 & 0.4635 \\
-Fisher's Least Square Linear Classifier & 0.0380 & 0.4635 \\
-Linear Bayes Normal Classifier & 0.0330 & 0.4966 \\
+K-Nearest Neighbor Classifier                                               & 0.0480 & 0.4635 \\
+Linear kernel classifier                                                    & 0.0360 & 0.4966 \\
+Decision Tree Classifier                                                    & 0.8030 & 0.4635 \\
+Fisher's Least Square Linear Classifier                                     & 0.0380 & 0.4635 \\
+Linear Bayes Normal Classifier                                              & 0.0330 & 0.4966 \\
 Linear classifier built on the KL expansion of the common covariance matrix & 0.0330 & 0.4966 \\
-Logistic Linear Classifier & 0.0510 & 0.4966 \\
-Naive Bayes classifier & 0.1130 & 0.4304 \\
-Nearest Mean Classifier & 0.0830 & 0.4966 \\
-Nearest Mean Scaled Classifier & 0.0430 & 0.4635 \\
-Linear perceptron classifier & 0.0680 & 0.4304 \\
-Polynomial Classification & 0.0380 & 0.4635 \\
-Quadratic Bayes Normal Classifier & 0.1220 & 0.4966 \\
-Voted perceptron classifier & 0.0290 & 0.4966 \\
-Uncorrelated normal based quadratic Bayes classifier & 0.0520 & 0.5297 \\
-Random subspace combining classifier & 0.0830 & 0.4966 \\
-Linear classifier using PC expansion on the joint data. & 0.0330 & 0.5297 \\
-Parzen Classifier & 0.0440 & 0.4635 \\
+Logistic Linear Classifier                                                  & 0.0510 & 0.4966 \\
+Naive Bayes classifier                                                      & 0.1130 & 0.4304 \\
+Nearest Mean Classifier                                                     & 0.0830 & 0.4966 \\
+Nearest Mean Scaled Classifier                                              & 0.0430 & 0.4635 \\
+Linear perceptron classifier                                                & 0.0680 & 0.4304 \\
+Polynomial Classification                                                   & 0.0380 & 0.4635 \\
+Quadratic Bayes Normal Classifier                                           & 0.1220 & 0.4966 \\
+Voted perceptron classifier                                                 & 0.0290 & 0.4966 \\
+Uncorrelated normal based quadratic Bayes classifier                        & 0.0520 & 0.5297 \\
+Random subspace combining classifier                                        & 0.0830 & 0.4966 \\
+Linear classifier using PC expansion on the joint data.                     & 0.0330 & 0.5297 \\
+Parzen Classifier                                                           & 0.0440 & 0.4635 \\
         \hline
     \end{tabular}
     \caption{ 
@@ -434,11 +447,76 @@ performance is an issue, then we recommend the Nearest Mean Scaled classifier if
 the training set is small and Voted Perceptron classifier if the training set is
 large.
 
-%\bibliographystyle{plain}
-%\bibliography{mybib}
+\appendix
+
+\section{Manual handwritten digits}
+Eventually, we scanned in our own handwritten digits. Our scan can be seen in figure
+\ref{fig:handwritten}. Because we wanted to test how well it performs on
+more ambiguous digits as well, we made some of our digits a bit more ugly.
+
+%% Zal ik de schone of de vieze inserten?
+\begin{figure}
+    \includegraphics[width=\columnwidth]{images/handwritten.png}
+    \caption{Our own handwritten digits}
+    \label{fig:handwritten}
+\end{figure}
+
+We trained the voted perceptron classifier on 1000 samples for each dataset and
+then tested it on our own handwriting.
+
+We did a small amount of preprocessing on our scan. First we extracted the
+individual digits from our handwriting. This was pretty easy because the digits
+in the figure were well aligned. The image had rgb channels, but we wanted it to
+be a boolean image, so in order to get a boolean result, we averaged the rgb
+components, to calculate the strength for each pixel and then we tresholded all the
+pixels on a value we found by experimentation.
+
+After running the classifier, we found an error rate of 20\%.
+Because not all the digits in our handwriting are as clear as the other ones, we
+thought it was interesting to make a confusing matrix (in table
+\ref{tab:confmatrix}) of our result to detect which digits are the outliers.
+We also made a table of error rates (in table \ref{tab:errorrate}).
+As can be seen our 7's and 9's are hard for the classifier to recognize, whereas
+our 1, 2, 5 and 8 are recognized in all cases.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|cccccccccc | c|}
+        \hline 
+        True   & \multicolumn{10}{c|}{Estimated Labels} & To-\\
+        Label & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & tals \\
+        \hline
+        0 & 9 & 0  & 0  & 0 & 0 & 0  & 0  & 1 & 0  & 0 & 10 \\
+        1 & 0 & 10 & 0  & 0 & 0 & 0  & 0  & 0 & 0  & 0 & 10 \\
+        2 & 0 & 0  & 10 & 0 & 0 & 0  & 0  & 0 & 0  & 0 & 10 \\
+        3 & 0 & 0  & 0  & 8 & 0 & 2  & 0  & 0 & 0  & 0 & 10 \\
+        4 & 0 & 0  & 0  & 0 & 9 & 0  & 1  & 0 & 0  & 0 & 10 \\
+        5 & 0 & 0  & 0  & 0 & 0 & 10 & 0  & 0 & 0  & 0 & 10 \\
+        6 & 0 & 0  & 0  & 0 & 0 & 0  & 10 & 0 & 0  & 0 & 10 \\
+        7 & 0 & 2  & 0  & 2 & 0 & 0  & 0  & 6 & 0  & 0 & 10 \\
+        8 & 0 & 0  & 0  & 0 & 0 & 0  & 0  & 0 & 10 & 0 & 10 \\
+        9 & 3 & 0  & 1  & 2 & 0 & 1  & 0  & 0 & 0  & 3 & 10 \\
+        \hline 
+        Total & 12 & 12 & 11 & 12 & 9 & 13 & 11 & 7 & 10 & 3 & 100 \\
+        \hline 
+    \end{tabular}
+    \caption{Confusion matrix}
+    \label{tab:confmatrix}
+\end{table}
+
+\begin{table}
+    \begin{tabular}{|c|cccccccccc|}
+        \hline
+        Class & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+        \hline
+        Error & 1 & 0 & 0 & 3 & 2 & 0 & 1 & 5 & 0 & 8 \\
+        \hline
+    \end{tabular}
+    \caption{Error rate per class}
+    \label{tab:errorrate}
+\end{table}
 
 \printbibliography
-
 
 \end{document}
 
