@@ -231,10 +231,16 @@ bins per cell and 16 cells. We found through experiment that 9 bins were most ef
 our problem as well, but 16 cells were used as opposed to 9 used by the original author.
 We derived at these constants experimentally by looking at the average and
 minimum error of all the tested classifiers for each possible combination were
-25 cells and 10 bins were chosen as maximums. \\\\
+25 cells and 10 bins were chosen as maximums. \\
 
 Next, the author locally normalizes the cells in order to compensate for illumination and contrast. However we do not implement this step as we are using binary images and thus both the contrast and illumination are already normalized perfectly across our image.\\\\
-The last step is to put all the bins of each cells into a column vector which has became our feature vector for classification.
+The last step is to put all the bins of each cells into a column vector which
+has became our feature vector for classification. \\
+
+% NIEUW verantwoording hog
+To get the histogram of oriented gradients to work in matlab, we downloaded an
+implementation by O. Ludwig \cite{Ludwig}. When we tested his implementation
+we noticed that we got better results then we got when using raw pixel data.
 
 \subsection{Principal component analysis}
 The hog descriptor does a good job at both reducing the amount of features needed as well as extracting features that are easier to classify by the bulk of classifiers. However there will still remain features (bins) that are either always empty or are barely used. For this reason we apply Principal Component analysis, which will extract the principal components and allows us to remove those with too little variance (empty to barely filled bins).\\\\
@@ -447,6 +453,7 @@ performance is an issue, then we recommend the Nearest Mean Scaled classifier if
 the training set is small and Voted Perceptron classifier if the training set is
 large.
 
+\pagebreak
 \appendix
 
 \section{Manual handwritten digits}
@@ -462,20 +469,20 @@ more ambiguous digits as well, we made some of our digits a bit more ugly.
 \end{figure}
 
 We trained the voted perceptron classifier on 1000 samples for each dataset and
-then tested it on our own handwriting.
+then tested it on our own handwriting. \\
 
 We did a small amount of preprocessing on our scan. First we extracted the
 individual digits from our handwriting. This was pretty easy because the digits
 in the figure were well aligned. The image had rgb channels, but we wanted it to
 be a boolean image, so in order to get a boolean result, we averaged the rgb
 components, to calculate the strength for each pixel and then we tresholded all the
-pixels on a value we found by experimentation.
+pixels on a value we found by experimentation. \\
 
 After running the classifier, we found an error rate of 20\%.
 Because not all the digits in our handwriting are as clear as the other ones, we
 thought it was interesting to make a confusing matrix (in table
 \ref{tab:confmatrix}) of our result to detect which digits are the outliers.
-We also made a table of error rates (in table \ref{tab:errorrate}).
+As a summary, we made a table of error rates (in table \ref{tab:errorrate}).
 As can be seen our 7's and 9's are hard for the classifier to recognize, whereas
 our 1, 2, 5 and 8 are recognized in all cases.
 
@@ -500,11 +507,12 @@ our 1, 2, 5 and 8 are recognized in all cases.
         Total & 12 & 12 & 11 & 12 & 9 & 13 & 11 & 7 & 10 & 3 & 100 \\
         \hline 
     \end{tabular}
-    \caption{Confusion matrix}
+    \caption{Confusion matrix when testing the classifier on our own handwriting}
     \label{tab:confmatrix}
 \end{table}
 
 \begin{table}
+    \centering
     \begin{tabular}{|c|cccccccccc|}
         \hline
         Class & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
@@ -512,7 +520,8 @@ our 1, 2, 5 and 8 are recognized in all cases.
         Error & 1 & 0 & 0 & 3 & 2 & 0 & 1 & 5 & 0 & 8 \\
         \hline
     \end{tabular}
-    \caption{Error rate per class}
+    \caption{Error rate per class when testing the classifier on our own
+    handwriting}
     \label{tab:errorrate}
 \end{table}
 
