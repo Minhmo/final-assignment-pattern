@@ -64,7 +64,7 @@
 %\usepackage{ieeefig}
 
 \title{A study on the classification of handwritten digits}
-\author{Laurent Verweijen, \and Tamis van der Laan}
+\author{By: Laurent Verweijen, \and Tamis van der Laan}
 \date{January 14, 2013}
 
 \begin{document}
@@ -112,15 +112,13 @@ Either before training or classification a preprocessing step is used in order
 to filter out noise and transform the image in such a way that structure is
 maintained and the data is prepared for feature selection, extraction and
 classification. Initially the data that was provided consisted of a set of
-images from different sizes that each contains a handwritten digit.
-
+images from different sizes that each contains a handwritten digit.\\\\
 \begin{figure}[h!]
     \centering
     \includegraphics[width=\columnwidth]{preprocessing2.png}
     \caption{Preprocessing pipeline}
     \label{fig:preprocessing}
 \end{figure}
-
 Figure \ref{fig:preprocessing} shows the pipeline that was used for preprocessing. First noise is reduced by removing very small objects. Then the data is closed in case the image contains gaps. Then the data is skewed so the longest side of the data (side with the most variance) is parallel to the y axis (slant correction). Then the features of our data are extracted and finally principal component analysis is used to reduce the size of the feature set as some features are barely to not used.\\\\
 In table \ref{tab:noise_reduction} some examples that show noise reduction and slant correction
 are shown based on the scheme above.
@@ -152,39 +150,38 @@ as parts of numbers may be missing. We do this using a closing operation which
 consists of a dilation followed by an erosion again using a 2-dimensional diamond shaped kernel.
 
 \subsubsection{Central Moments for orientation and slant correction}
-Next we transform the binary input image such that it is centered and oriented in such a way that the longest side of the number is parallel to the y axis. The transformation used is skewing and removes the slanting from the text. This operation will also decrease the variance of the pixels as some pixels such as those in the corners will be activated less often and therefore contribute less to the number recognition system. This decrease in pixel variance propagates through to the Histogram Oriented Features. This in turn allows Principle Component Analysis to decrease the feature set significantly as we threshold out the low variance principal components. This allows for far faster training and classification performance.
-
+Next we transform the binary input image such that it is centered and oriented
+in such a way that the longest side of the number is parallel to the y axis. The
+transformation used is skewing and removes the slanting from the text. This
+operation will also decrease the variance of the pixels as some pixels such as
+those in the corners will be activated less often and therefore contribute less
+to the number recognition system. This decrease in pixel variance propagates
+through to the Histogram Oriented Features. This in turn allows Principle
+Component Analysis to decrease the feature set significantly as we threshold out
+the low variance principal components. This allows for far faster training and
+classification performance.\\\\
 We first need to center the image. To do this we find the image centroid, which is simple the mean of the x axis and the y axis:
-
 \begin{align}
     \bar{x}&=(x_1+x_2+...+x_n)/n_x \\
     \bar{y}&=(y_1+y_2+...+y_n)/n_y
 \end{align}
-
 In order to find the orientation of binary numbers we used central moments. Central moments are calculated in the following way and make use of the centroid:
-
 \begin{equation}
     \mu_{pq} = \sum_x \sum_y (x - \overline{x})^p(y - \overline{y})^q f(x, y)
 \end{equation}
-
- 
 Next we you use this definition to compute $\mu_{20}, \mu_{21}, \mu_{11}$ which represents the x and y variance and covariance respectively. We then use these central moments to compute the orientation as followed:
-
 \begin{equation}
     \Theta = \frac{1}{2} \arctan \left(
         \frac{2 \cdot \mu_{11}}{\mu_{20} - \mu_{02}}
     \right)
 \end{equation}
-
 We then skew the image parallel to the y axis and find the bounding box and square it where the sides are equal to the longest previous side such that geometric information is preserved. We leave a one pixel border around the bounding box because the Histogram of Oriented Gradient algorithm (as its name already suggests) makes use of the gradient (first order derivative in both the x and y direction) and thus its three part filter needs the extra one pixel space. The slant correction skew matrix is given by:
-
 \begin{equation}
     S = \begin{pmatrix}
         1 & 0 \\
         \sin(0.5 \pi - \theta) & \cos(0.5 \pi - \theta)
     \end{pmatrix}
 \end{equation}
-
 \subsubsection{Scaling}
 Finally the images are scaled to 32 by 32 pixels, ready for feature selection, extraction and classification.
 \subsection{Feature extraction and selection}
@@ -203,24 +200,19 @@ We however found that none could compete with the histogram of oriented gradient
 The simplest features that can be taken from an image are the raw pixels. This
 is also the fastest feature extraction, because the only operation that needs
 to be performed is the scaling of all images to the same size. We tried this for
-different image sizes. Most digits got recognized well by using this method. The
-error rate on a big dataset was about 10\%. In particular the digits three and five were often mixed up. We used the raw data as a control to compare features based on classification errors. 
+different image sizes. Most digits got recognized well by using this method.  We used the raw data as a control to compare features based on classification errors. 
 
 \subsubsection{Histogram oriented features (HOG)}
 Histogram of Oriented Gradients is a feature extraction and selection technique.
 \cite{hog} It makes use of the image gradient, were both the orientation of the gradient and magnitude are used. Due to the binary nature of our input we will not be using the magnitude of the gradient. The first step of the Histogram Oriented Gradients algorithm is to compute the gradient of the image. This is done by taking the first derivative of the image in both the x and y direction. The method used for this is convolution with the following filters:
-
 \begin{equation}
     [-1, 0, 1] \text{ and } [-1, 0, 1]^T
 \end{equation}
-
 We now obtain two images containing the x derivative and y derivative respectively. The direction angle of the gradient for each pixel can now be computed using the following formula: 
-
 \begin{equation}
     \theta = \arctan\left(\frac{\partial f}{\partial y}, 
         \frac{\partial f}{\partial x}\right)
 \end{equation}
-
 The next step is to create cells which will contain histograms. In the original
 paper the gradient magnitude of each pixel within the range of a given bin is
 summed to get the final bin value. The original paper is aimed at pedestrian
@@ -231,17 +223,12 @@ bins per cell and 16 cells. We found through experiment that 9 bins were most ef
 our problem as well, but 16 cells were used as opposed to 9 used by the original author.
 We derived at these constants experimentally by looking at the average and
 minimum error of all the tested classifiers for each possible combination were
-25 cells and 10 bins were chosen as maximums. \\
-
+25 cells and 10 bins were chosen as maximums. \\\\
 Next, the author locally normalizes the cells in order to compensate for illumination and contrast. However we do not implement this step as we are using binary images and thus both the contrast and illumination are already normalized perfectly across our image.\\\\
 The last step is to put all the bins of each cells into a column vector which
-has became our feature vector for classification. \\
-
-% NIEUW verantwoording hog
+has became our feature vector for classification. \\\\
 To get the histogram of oriented gradients to work in matlab, we downloaded an
-implementation by O. Ludwig \cite{Ludwig}. When we tested his implementation
-we noticed that we got better results then we got when using raw pixel data.
-
+implementation by O. Ludwig \cite{Ludwig}. 
 \subsection{Principal component analysis}
 The hog descriptor does a good job at both reducing the amount of features needed as well as extracting features that are easier to classify by the bulk of classifiers. However there will still remain features (bins) that are either always empty or are barely used. For this reason we apply Principal Component analysis, which will extract the principal components and allows us to remove those with too little variance (empty to barely filled bins).\\\\
 Principal component analysis (pca) is a data reduction technique that generates a set of
@@ -276,7 +263,6 @@ but not excellent. We found that the nearest mean scaled classifier performed
 best on the small data set. For this reason we chose the VPC for case one and
 the NMSC for case two. The performance of both classifiers were found to be more
 than fast enough.
-
 \subsection{Classifier Testing Phase}
 We used the testing function provided by the client to test all the classifiers.
 We used the default setting of a 100 samples to test on. With exclusion of the
@@ -313,7 +299,6 @@ Parzen Classifier                                                           & 0.
         which uses 100 samples per class to test the classifier. The training
         data consisted of the small data set of 10 samples per class. }
 \end{table}
-
 \begin{figure}[] 
     \includegraphics[scale=0.385]{images/large_data_set_tested.png}
 
@@ -355,7 +340,6 @@ Parzen Classifier                                                           & 0.
         data consisted of the large data set of 100 samples per class. }
         
 \end{table}
-    
 \begin{figure}[]
     \includegraphics[scale=0.385]{images/small_data_set_tested.png}
 
@@ -366,11 +350,9 @@ training data consisted of the large data set of 100 samples per class.The
         red line shows the 5\% maximum error set by the client.  }
     \label{fig:test-small}
 \end{figure}
-
 We see that many classifiers meet our criteria. We chose to use the two best
 classifiers namely the Voted perceptron classifier for the large data set and
 the Nearest Mean Scaled classifier for the small data set.
-
 \subsection{Voted Perceptron Classifier}
 As discussed above in the introduction the plan was to treat the number
 recognition system in the same way as the person recognition system implemented
@@ -398,7 +380,6 @@ linearly separable the algorithm will not converge. Therefore the amount of
 cycles allowed is bounded. Due to the high performance of the algorithm we
 choose the maximum amount of cycles to be 1000 which may be far more than
 needed.
-
 % TODO mooiere formules
 \subsection{Nearest Mean Scaled Classifier}
 The nearest mean scaled classifier is an extension of the nearest mean
@@ -467,17 +448,14 @@ more ambiguous digits as well, we made some of our digits a bit more ugly.
     \caption{Our own handwritten digits}
     \label{fig:handwritten}
 \end{figure}
-
 We trained the voted perceptron classifier on 1000 samples for each dataset and
-then tested it on our own handwriting. \\
-
+then tested it on our own handwriting. \\\\
 We did a small amount of preprocessing on our scan. First we extracted the
 individual digits from our handwriting. This was pretty easy because the digits
 in the figure were well aligned. The image had rgb channels, but we wanted it to
 be a boolean image, so in order to get a boolean result, we averaged the rgb
 components, to calculate the strength for each pixel and then we tresholded all the
-pixels on a value we found by experimentation. \\
-
+pixels on a value we found by experimentation. \\\\
 After running the classifier, we found an error rate of 20\%.
 Because not all the digits in our handwriting are as clear as the other ones, we
 thought it was interesting to make a confusing matrix (in table
@@ -485,8 +463,7 @@ thought it was interesting to make a confusing matrix (in table
 As a summary, we made a table of error rates (in table \ref{tab:errorrate}).
 As can be seen our 7's and 9's are hard for the classifier to recognize, whereas
 our 1, 2, 5 and 8 are recognized in all cases.
-
-\begin{table}[H]
+\begin{table}
     \centering
     \begin{tabular}{|c|cccccccccc | c|}
         \hline 
