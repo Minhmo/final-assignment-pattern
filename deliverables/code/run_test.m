@@ -1,5 +1,5 @@
 %%FEATURE EXTRACTION TO USE
-filename    = 'dig_2_data';
+filename    = 'my_rep';
 
 % Train classifier
 clean = prnist([0:9],[1:100]);
